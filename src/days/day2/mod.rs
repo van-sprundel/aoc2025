@@ -6,13 +6,13 @@ pub fn part1(input: &str) {
             let left = range[..index].trim().parse::<usize>().unwrap();
             let right = range[index + 1..].trim().parse::<usize>().unwrap();
 
-            let mut index = left.clone();
+            let mut index = left;
             loop {
                 if index > right {
                     break;
                 }
 
-                if !is_valid_id(&*index.to_string()) {
+                if !is_valid_id(&index.to_string()) {
                     invalid_id_acc += index;
                 }
 
@@ -33,13 +33,13 @@ pub fn part2(input: &str) {
             let left = range[..index].trim().parse::<usize>().unwrap();
             let right = range[index + 1..].trim().parse::<usize>().unwrap();
 
-            let mut index = left.clone();
+            let mut index = left;
             loop {
                 if index > right {
                     break;
                 }
 
-                if !is_valid_id_part2(&*index.to_string()) {
+                if !is_valid_id_part2(&index.to_string()) {
                     invalid_id_acc += index;
                 }
 
@@ -66,7 +66,7 @@ fn is_valid_id(n: &str) -> bool {
     let left = &chars[..len_h];
     let right = &chars[len_h..];
 
-    return *left != *right;
+    *left != *right
 }
 
 /// s == s[0:d] repeated n/d times
@@ -80,7 +80,7 @@ fn is_valid_id_part2(n: &str) -> bool {
         // this can NEVER match since we can't get d chunks of the string
         // e.g. 1231234 we cannot get a left,right slice because it's uneven
         // this is fine to skip
-        if len % d != 0 {
+        if !len.is_multiple_of(d) {
             continue;
         }
 

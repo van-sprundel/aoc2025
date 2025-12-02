@@ -1,4 +1,4 @@
-use std::{iter::Map, usize::MAX};
+use std::iter::Map;
 
 const DIAL_START: isize = 50;
 const MAX_DIAL_LEN: isize = 100;
