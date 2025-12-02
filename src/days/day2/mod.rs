@@ -8,17 +8,14 @@ pub fn part2(input: &str) {
 fn solution(input: &str, part: Part) {
     let mut invalid_id_acc = 0;
     input.split(',').for_each(|range| {
-        let divider_index = range.find('-');
-        if let Some(index) = divider_index {
+        range.find('-').iter().for_each(|&index| {
             let left = range[..index].trim().parse::<usize>().unwrap();
             let right = range[index + 1..].trim().parse::<usize>().unwrap();
 
-            (left..right).for_each(|index| {
-                if !is_valid_id(&index.to_string(), part.clone()) {
-                    invalid_id_acc += index;
-                }
-            });
-        }
+            invalid_id_acc += (left..right)
+                .map(|i| (!is_valid_id(&i.to_string(), part.clone()) as usize) * i)
+                .sum::<usize>()
+        });
     });
 
     println!("{invalid_id_acc}")
@@ -27,8 +24,8 @@ fn solution(input: &str, part: Part) {
 // enums arent real xd
 #[derive(PartialEq, Clone)]
 enum Part {
-    PART1,
-    PART2,
+    PART1 = 0,
+    PART2 = 1,
 }
 
 fn is_valid_id(n: &str, part: Part) -> bool {
@@ -37,43 +34,27 @@ fn is_valid_id(n: &str, part: Part) -> bool {
 
     // we now need to find all denominators i guess because i can match three four and five times
     // so len/2 can match, but also len/3 len/4 .. len/n (1)
-    let (start_d, end_d) = match part {
-        /// s == s[0:2] repeated n/2 times
-        Part::PART1 => {
-            if len % 2 == 1 {
-                return true;
-            }
-            let d = len / 2;
-            (d, d + 1)
-        }
-        /// s == s[0:d] repeated n/d times
-        Part::PART2 => (1, len),
-    };
+    /// s(part1) == s[0:2] repeated n/2 times
+    /// s(part2) == s[0:d] repeated n/d times
+    // this means that part1 only needs to iter on d..d+1 and it will be sufficient
+    // for part2 we need to iter 1..d+1
+    // both ends can be d+1 because we can't surpass d (we can't make less than 2 chunks)
+    let d = len / 2;
+    let start_d = (part.clone() as u8 == 0) as usize * d + ((part.clone() as u8 & 1) as usize);
+    let end_d = d + 1;
 
-    (start_d..end_d).all(|d| {
-        // this can NEVER match since we can't get d chunks of the string
-        // e.g. 1231234 we cannot get a left,right slice because it's uneven
-        // this is fine to skip
-        if !len.is_multiple_of(d) {
-            return true;
-        }
-
-        let chunk = &bytes[..d];
-        let mut ok = true;
-
-        let mut i = d;
-        while i < len {
-            if &bytes[i..i + d] != chunk {
-                ok = false;
-                break;
-            }
-            i += d;
-        }
-
-        if ok {
-            return false;
-        }
-
-        true
-    })
+    // part 1 has a specific condition where if the length doesnt match we continue
+    // this also applies for part 2 but for chunk d
+    // for some reason len.is_multiple_of doesn't cover this
+    (part == Part::PART1 && len % 2 == 1)
+        || (start_d..end_d).all(|d| {
+            // this can NEVER match since we can't get d chunks of the string
+            // e.g. 1231234 we cannot get a left,right slice because it's uneven
+            // this is fine to skip
+            !len.is_multiple_of(d)
+        // then we can do the actual logic where we check if any chunk does NOT match the expected chunk
+            || (d..=len - d)
+                .step_by(d)
+                .any(|i| bytes[i..i + d] != bytes[..d])
+        })
 }
