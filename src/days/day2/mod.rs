@@ -13,24 +13,18 @@ fn solution(input: &str, part: Part) {
             let left = range[..index].trim().parse::<usize>().unwrap();
             let right = range[index + 1..].trim().parse::<usize>().unwrap();
 
-            let mut index = left;
-            loop {
-                if index > right {
-                    break;
-                }
-
+            (left..right).for_each(|index| {
                 if !is_valid_id(&index.to_string(), part.clone()) {
                     invalid_id_acc += index;
                 }
-
-                index += 1;
-            }
+            });
         }
     });
 
     println!("{invalid_id_acc}")
 }
 
+// enums arent real xd
 #[derive(PartialEq, Clone)]
 enum Part {
     PART1,
@@ -55,12 +49,13 @@ fn is_valid_id(n: &str, part: Part) -> bool {
         /// s == s[0:d] repeated n/d times
         Part::PART2 => (1, len),
     };
-    for d in start_d..end_d {
+
+    (start_d..end_d).all(|d| {
         // this can NEVER match since we can't get d chunks of the string
         // e.g. 1231234 we cannot get a left,right slice because it's uneven
         // this is fine to skip
         if !len.is_multiple_of(d) {
-            continue;
+            return true;
         }
 
         let chunk = &bytes[..d];
@@ -78,7 +73,7 @@ fn is_valid_id(n: &str, part: Part) -> bool {
         if ok {
             return false;
         }
-    }
 
-    true
+        true
+    })
 }
