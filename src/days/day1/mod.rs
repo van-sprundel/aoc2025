@@ -60,7 +60,7 @@ pub fn part2(input: &str) {
         // if old_dial == 0, we don't count the "first" hit differently
         // this check is a bit annoying, so maybe TODO cleanup
         let at_zero = (old_dial == 0) as isize;
-        let zeros_hit = hits_zero * (1 + additional_zeros) * (1 - at_zero) + at_zero * (num / 100);
+        let zeros_hit = hits_zero * (1 + additional_zeros) * (1 - at_zero) + at_zero * (num / MAX_DIAL_LEN);
 
         count += zeros_hit as usize;
         dial = new_dial;
