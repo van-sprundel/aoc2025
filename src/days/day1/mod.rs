@@ -15,17 +15,19 @@ fn to_sign(c: u8) -> isize {
 }
 
 pub fn part1(input: &str) {
-    let mut count: usize = 0;
     let mut dial: isize = DIAL_START;
 
-    input.lines().for_each(|line| {
-        let num = line[1..].parse::<isize>().unwrap();
-        let b = line.as_bytes()[0];
+    let count = input
+        .lines()
+        .map(|line| {
+            let num = line[1..].parse::<isize>().unwrap();
+            let b = line.as_bytes()[0];
 
-        dial += num * to_sign(b);
-        dial = dial.rem_euclid(MAX_DIAL_LEN);
-        count += (dial == 0) as usize;
-    });
+            dial += num * to_sign(b);
+            dial = dial.rem_euclid(MAX_DIAL_LEN);
+            (dial == 0) as usize
+        })
+        .sum::<usize>();
 
     println!("{count}")
 }
