@@ -14,34 +14,36 @@ fn solution(line: &str, max_slots: usize) -> i64 {
     let mut pos = 0;
     let chars: Vec<char> = line.chars().collect();
 
-    for _ in 0..max_slots {
-        if pos >= chars.len() {
-            break;
-        }
-
-        // find the largest digit we can take from current position
-        // also keep track of available slots
+    for _ in 0..max_slots.min(chars.len()) {
         let remaining_slots = max_slots - best.len();
         let remaining_chars = chars.len() - pos;
 
-        if remaining_chars < remaining_slots {
-            break;
-        }
+        //  check if we should continue
+        let should_continue = (remaining_chars >= remaining_slots) as usize;
+
+        // calculate max_look_ahead (will be 0 if we shouldn't continue)
+        let max_look_ahead = (remaining_chars - remaining_slots + 1) * should_continue;
 
         // find the largest digit within valid range
-        let max_look_ahead = remaining_chars - remaining_slots + 1;
-        let mut best_digit = chars[pos];
-        let mut best_idx = pos;
+        let (best_digit, best_idx) = chars
+            .iter()
+            .enumerate()
+            .skip(pos)
+            .take(max_look_ahead)
+            .fold(
+                (chars.get(pos).copied().unwrap_or('0'), pos),
+                |(best_digit, best_idx), (i, &curr)| {
+                    // select the better digit/index
+                    let is_better = (curr > best_digit) as usize;
+                    let new_digit = [best_digit, curr][is_better];
+                    let new_idx = [best_idx, i][is_better];
+                    (new_digit, new_idx)
+                },
+            );
 
-        for (i, curr) in chars.iter().enumerate().skip(pos).take(max_look_ahead) {
-            if chars[i] > best_digit {
-                best_digit = *curr;
-                best_idx = i;
-            }
-        }
-
-        best.push(best_digit);
-        pos = best_idx + 1;
+        // only push if we actually found something (max_look_ahead > 0)
+        best.extend(std::iter::repeat_n(best_digit, should_continue));
+        pos = best_idx + should_continue;
     }
 
     best.parse::<i64>().unwrap()
