@@ -1,7 +1,15 @@
 pub fn part1(s: &str) {
-    let g: Vec<Vec<u8>> = s.lines().map(|l| l.as_bytes().to_vec()).collect();
-    let h = g.len();
-    let w = g[0].len();
+    let original: Vec<Vec<u8>> = s.lines().map(|l| l.as_bytes().to_vec()).collect();
+    let h = original.len();
+    let w = original[0].len();
+
+    // pad grid with 1-cell border
+    let mut g = vec![vec![b'.'; w + 2]; h + 2];
+    for y in 0..h {
+        for x in 0..w {
+            g[y + 1][x + 1] = original[y][x];
+        }
+    }
 
     let dirs: [(isize, isize); 8] = [
         (-1, 0),
@@ -16,27 +24,22 @@ pub fn part1(s: &str) {
 
     let mut result = 0;
 
-    for y in 0..h {
-        for x in 0..w {
-            if g[y][x] != b'@' {
-                continue;
-            }
+    for y in 1..=h {
+        for x in 1..=w {
+            // 1 if '@', 0 otherwise
+            let is_at = (g[y][x] == b'@') as usize;
 
             let mut count = 0;
-            for (dy, dx) in dirs {
-                let ny = y as isize + dy;
-                let nx = x as isize + dx;
-                if ny < 0 || nx < 0 || ny >= h as isize || nx >= w as isize {
-                    continue;
-                }
-                if g[ny as usize][nx as usize] == b'@' {
-                    count += 1;
-                }
+            for &(dy, dx) in &dirs {
+                let ny = (y as isize + dy) as usize;
+                let nx = (x as isize + dx) as usize;
+
+                // no bounds check needed due to padding B)
+                count += (g[ny][nx] == b'@') as usize;
             }
 
-            if count < 4 {
-                result += 1;
-            }
+            // multiply conditions together
+            result += is_at * ((count < 4) as usize);
         }
     }
 
