@@ -1,3 +1,11 @@
+pub fn part1(s: &str) {
+    println!("{}", solve(s, false));
+}
+
+pub fn part2(s: &str) {
+    println!("{}", solve(s, true));
+}
+
 fn solve(s: &str, remove: bool) -> usize {
     let original: Vec<Vec<u8>> = s.lines().map(|l| l.as_bytes().to_vec()).collect();
     let h = original.len();
@@ -23,8 +31,9 @@ fn solve(s: &str, remove: bool) -> usize {
     ];
 
     let mut total = 0;
+    let mut should_continue = 1;
 
-    loop {
+    while should_continue != 0 {
         let mut found_this_round = 0;
         let mut to_remove = vec![vec![0u8; w + 2]; h + 2];
 
@@ -47,28 +56,20 @@ fn solve(s: &str, remove: bool) -> usize {
 
         total += found_this_round;
 
-        // if not removing, stop after first iteration
-        // if removing, stop when nothing found
-        let should_continue = (remove as usize) * ((found_this_round > 0) as usize);
-        if should_continue == 0 {
-            break;
-        }
-
         // replace with '.' if marked, keep current otherwise
+        // we need to multiply by 0 to skip when should_continue will be 0
+        let do_removal = (remove as usize) * ((found_this_round > 0) as usize);
         for y in 1..=h {
             for x in 1..=w {
-                g[y][x] = g[y][x] * (1 - to_remove[y][x]) + b'.' * to_remove[y][x];
+                let mask = to_remove[y][x] * (do_removal as u8);
+                g[y][x] = g[y][x] * (1 - mask) + b'.' * mask;
             }
         }
+
+        // if not removing, stop after first iteration
+        // if removing, stop when nothing found
+        should_continue = (remove as usize) * ((found_this_round > 0) as usize);
     }
 
     total
-}
-
-pub fn part1(s: &str) {
-    println!("{}", solve(s, false));
-}
-
-pub fn part2(s: &str) {
-    println!("{}", solve(s, true));
 }
