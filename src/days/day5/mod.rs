@@ -36,12 +36,12 @@ fn solution(input: &str, include_ids: usize) -> usize {
             .unwrap_or(false);
 
         let extend_last = should_merge as usize;
-        let push_new = (1 - extend_last) as usize;
+        let push_new = (1 - extend_last);
 
         // update last element if merging
-        acc.iter_mut().last().map(|(_, last_right)| {
+        if let Some((_, last_right)) = acc.iter_mut().last() {
             *last_right = *last_right * (1 - extend_last) + extend_last * (*last_right).max(right);
-        });
+        }
 
         // add new element if not merging
         acc.extend([(left, right)].iter().cycle().take(push_new));
